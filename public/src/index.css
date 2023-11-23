@@ -4,7 +4,9 @@
 .app-name {
   color: #EB7F00;
   font-family: 'PT Sans Narrow', sans-serif;
+  font-size: 3rem;
   text-align: center;
+  padding-top: 1rem;
 }
 
 body {
