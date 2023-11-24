@@ -22,3 +22,33 @@ module.exports.signin = async (req, res, next) => {
     next(ex);
   }
 };
+
+module.exports.login = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user)
+      return res.json({ message: "User does not exist.", status: false });
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword)
+      return res.json({ message: "Incorrect password.", status: false });
+    delete user.password;
+    return res.json({ status: true, user });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.setAvatar = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const avatarImage = req.body.image;
+    const userData = await User.findByIdAndUpdate(userId, {
+      isAvatarImageSet: true,
+      avatarImage,
+    });
+    return res.json({isSet: userData.isAvatarImageSet, image: userData.avatarImage});
+  } catch (ex) {
+    next(ex)
+  }
+};

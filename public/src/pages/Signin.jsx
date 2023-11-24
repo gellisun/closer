@@ -23,6 +23,12 @@ export default function Signin() {
     theme: "dark",
   };
 
+  // useEffect(() => {
+  //   if (localStorage.getItem('closer-user')) {
+  //     navigate("/");
+  //   }
+  // }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
