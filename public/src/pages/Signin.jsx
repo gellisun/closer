@@ -23,11 +23,11 @@ export default function Signin() {
     theme: "dark",
   };
 
-  // useEffect(() => {
-  //   if (localStorage.getItem('closer-user')) {
-  //     navigate("/");
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (localStorage.getItem("closer-user")) {
+      navigate("/");
+    }
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -39,40 +39,34 @@ export default function Signin() {
         password,
       });
       if (data.status === false) {
-        toast.error(data.message, toastOptions)
+        toast.error(data.message, toastOptions);
       }
       if (data.status === true) {
-        localStorage.setItem('closer-user', JSON.stringify(data.user));
+        localStorage.setItem("closer-user", JSON.stringify(data.user));
       }
-      navigate('/');
+      navigate("/");
     }
   };
 
   const handleValidation = () => {
     const { password, confirmPassword, username, email } = values;
     if (password !== confirmPassword) {
-      toast.error(
-        "Password and confirm password do not match.",
-        toastOptions,
-        );
+      toast.error("Password and confirm password do not match.", toastOptions);
       return false;
     } else if (username.length < 3) {
       toast.error(
         "Username should be greater than three characters.",
-        toastOptions,
+        toastOptions
       );
       return false;
     } else if (password.length < 8) {
       toast.error(
         "The passwordd lenght should be equal or greater greater than eight characters.",
-        toastOptions,
+        toastOptions
       );
       return false;
-    } else if (email==="") {
-      toast.error(
-        "The email is required.",
-        toastOptions,
-      )
+    } else if (email === "") {
+      toast.error("The email is required.", toastOptions);
     }
     return true;
   };

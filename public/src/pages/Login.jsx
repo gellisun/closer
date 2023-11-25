@@ -21,11 +21,11 @@ export default function Login() {
     theme: "dark",
   };
 
-  // useEffect(() => {
-  //   if (localStorage.getItem('closer-user')) {
-  //     navigate("/");
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (localStorage.getItem("closer-user")) {
+      navigate("/");
+    }
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
