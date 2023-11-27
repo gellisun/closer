@@ -1,34 +1,41 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 
-export default function Contacts({ contacts, currentUser }) {
+export default function Contacts({ contacts, currentUser, changeChat }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelectedChat, setCurrentSelectedChat] = useState(undefined);
 
   useEffect(() => {
-    if (currentUser) {
-      setCurrentUserImage(currentUser.avatarImage);
-      setCurrentUserName(currentUser.username);
-    }
-  }, [currentUser]);
+    (async () => {
+      const data = await JSON.parse(localStorage.getItem("closer-user"));
+      setCurrentUserName(data.username);
+      setCurrentUserImage(data.avatarImage);
+    })();
+  }, []);
 
-  const changeCurrentChat = (index, contact) => {};
+  const changeCurrentChat = (index, contact) => {
+    setCurrentSelectedChat(index);
+    changeChat(contact);
+  };
 
   return (
     <>
-      {currentUserImage && currentUserName && (
+      {currentUserImage && currentUserName && contacts && (
         <>
-          <h1 className="app-name">closer</h1>
           <Container>
+            <div className="brand">
+              <h1 className="app-name">closer</h1>
+            </div>
             <div className="contacts">
               {contacts.map((contact, index) => {
                 return (
                   <div
+                    key={contact._id}
                     className={`contact ${
                       index === currentSelectedChat ? "selected" : ""
                     }`}
-                    key={index}
+                    onClick={() => changeCurrentChat(index, contact)}
                   >
                     <div className="avatar">
                       <img
@@ -69,13 +76,10 @@ const Container = styled.div`
   .brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
     justify-content: center;
-    img {
-      height: 2rem;
-    }
+    gap: 1em;
     h3 {
-      color: white;
+      color: #f3ffe2;
       text-transform: uppercase;
     }
   }
@@ -94,7 +98,7 @@ const Container = styled.div`
       }
     }
     .contact {
-      background-color: #ffffff34;
+      background-color: #0a1924;
       min-height: 5rem;
       cursor: pointer;
       width: 90%;
@@ -111,17 +115,17 @@ const Container = styled.div`
       }
       .username {
         h3 {
-          color: white;
+          color: #f3ffe2;
         }
       }
     }
     .selected {
-      background-color: #9a86f3;
+      background-color: #eb7f00;
     }
   }
 
   .current-user {
-    background-color: #0d0d30;
+    background-color: #eb7f00;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -133,14 +137,14 @@ const Container = styled.div`
       }
     }
     .username {
-      h2 {
-        color: white;
+      h3 {
+        color: #f3ffe2;
       }
     }
     @media screen and (min-width: 720px) and (max-width: 1080px) {
       gap: 0.5rem;
       .username {
-        h2 {
+        h3 {
           font-size: 1rem;
         }
       }
