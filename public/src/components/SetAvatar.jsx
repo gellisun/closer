@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { Buffer } from "buffer";
@@ -7,7 +7,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { setAvatarRoute } from "../utilities/APIRoutes";
-
 export default function SetAvatar() {
   const api = `https://api.multiavatar.com/4645646`;
   const navigate = useNavigate();
@@ -23,22 +22,31 @@ export default function SetAvatar() {
   };
 
   useEffect(() => {
-    if (!localStorage.getItem("closer-user")) navigate("/login");
+    (async () => {
+      if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY))
+        navigate("/login");
+    })();
   }, []);
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
       toast.error("Please select an avatar", toastOptions);
     } else {
-      const user = await JSON.parse(localStorage.getItem("closer-user"));
+      const user = await JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+
       const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
         image: avatars[selectedAvatar],
       });
 
-      if (data.image) {
+      if (data.isSet) {
         user.isAvatarImageSet = true;
         user.avatarImage = data.image;
-        localStorage.setItem("closer-user", JSON.stringify(user));
+        localStorage.setItem(
+          process.env.REACT_APP_LOCALHOST_KEY,
+          JSON.stringify(user)
+        );
         navigate("/");
       } else {
         toast.error("Error setting avatar. Please try again.", toastOptions);
@@ -47,29 +55,19 @@ export default function SetAvatar() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       const data = [];
-
-      try {
-        for (let i = 0; i < 4; i++) {
-          const response = await axios.get(
-            `${api}/${Math.round(Math.random() * 1000)}`
-          );
-
-          const buffer = new Buffer(response.data);
-          data.push(buffer.toString("base64"));
-        }
-
-        setAvatars(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching avatars:", error);
-        setIsLoading(false);
+      for (let i = 0; i < 4; i++) {
+        const image = await axios.get(
+          `${api}/${Math.round(Math.random() * 1000)}`
+        );
+        const buffer = new Buffer(image.data);
+        data.push(buffer.toString("base64"));
       }
-    };
-
-    fetchData();
-  }, [api]);
+      setAvatars(data);
+      setIsLoading(false);
+    })();
+  }, []);
 
   return (
     <>
@@ -83,20 +81,22 @@ export default function SetAvatar() {
             <h1>Pick an Avatar as your profile picture</h1>
           </div>
           <div className="avatars">
-            {avatars.map((avatar, index) => (
-              <div
-                className={`avatar ${
-                  selectedAvatar === index ? "selected" : ""
-                }`}
-                key={index}
-              >
-                <img
-                  src={`data:image/svg+xml;base64,${avatar}`}
-                  alt="avatar"
-                  onClick={() => setSelectedAvatar(index)}
-                />
-              </div>
-            ))}
+            {avatars.map((avatar, index) => {
+              return (
+                <div
+                  className={`avatar ${
+                    selectedAvatar === index ? "selected" : ""
+                  }`}
+                >
+                  <img
+                    src={`data:image/svg+xml;base64,${avatar}`}
+                    alt="avatar"
+                    key={avatar}
+                    onClick={() => setSelectedAvatar(index)}
+                  />
+                </div>
+              );
+            })}
           </div>
           <button onClick={setProfilePicture} className="submit-btn">
             Set as Profile Picture

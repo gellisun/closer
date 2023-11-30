@@ -2,7 +2,7 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import Signin from '../src/pages/Signin';
 import Login from '../src/pages/Login';
 import Chat from '../src/pages/Chat';
-import SetAvatar from '../src/pages/SetAvatar';
+import SetAvatar from '../src/components/SetAvatar';
 
 export default function App() {
   return <BrowserRouter>
