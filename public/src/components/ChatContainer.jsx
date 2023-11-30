@@ -3,10 +3,13 @@ import Logout from "./Logout";
 import ChatInput from "./ChatInput";
 import axios from "axios";
 import { sendMessageRoute, getMessagesRoute } from "../utilities/APIRoutes";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
-export default function ChatContainer({ currentChat, currentUser }) {
+export default function ChatContainer({ currentChat, currentUser, socket }) {
   const [messages, setMessages] = useState([]);
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+  const scrollRef = useRef();
 
   useEffect(() => {
     if (currentUser) {
@@ -32,11 +35,35 @@ export default function ChatContainer({ currentChat, currentUser }) {
           to: currentChat._id,
           message: msg,
         });
-      }
+        socket.current.emit('send-msg', {
+          to: currentChat._id,
+          from: currentUser._id,
+          message: msg,
+        });
+        const msgs = [...messages];
+        msgs.push({fromSelf:true, message: msg});
+        setMessages(msgs);
+      };
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
+
+  useEffect(() => {
+    if(socket.current) {
+      socket.current.on('msg-received', (msg) => {
+        setArrivalMessage({fromSelf:false, message: msg});
+      });
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({behaviour: 'smooth'});
+  }, [messages]);
 
   return (
     <>
@@ -59,7 +86,7 @@ export default function ChatContainer({ currentChat, currentUser }) {
           <div className="chat-messages">
             {messages.map((message) => {
               return (
-                <div>
+                <div ref={scrollRef} key={uuidv4()}>
                   <div
                     className={`message ${
                       message.fromSelf ? "sent" : "received"
